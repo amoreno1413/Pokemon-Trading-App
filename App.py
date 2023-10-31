@@ -79,6 +79,7 @@ class MainWindow(QMainWindow):
         self.resultList.clear()
         self.filterBox.addItem("All")
         seen = []
+
         for row in res:
             name, cardSet, price = row
             text = f"{name} - {cardSet} - ${price}"
@@ -109,7 +110,7 @@ class MainWindow(QMainWindow):
                 name, cardSet, price = row
                 text = f"{name} - {cardSet} - ${price}"
                 imgPath = os.path.join("Images", cardSet, f"{name}.jpg")
-                if cardSet not in seen:
+                if cardSet not in seen and cardSet != self.filterBox.currentText():
                     seen.append(cardSet)
                     self.filterBox.addItem(cardSet)
                 item = QListWidgetItem(text)
