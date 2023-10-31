@@ -15,7 +15,7 @@ This app is designed to help you determine the trade value of your Pokémon card
 
 This app helps you make informed decisions about the value of your Pokémon cards when trading. It's a handy tool for collectors and traders alike. 
 
-At the moment the card database contains cards from XY-SV (Excluding Promos), older cards will be added in the future!
+At the moment the card database contains cards from D/P-S/V (Excluding Promos), older cards will be added in the future!
 
 Happy trading!
 
