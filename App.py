@@ -1,8 +1,8 @@
 import os
 
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QLineEdit, QVBoxLayout, QComboBox, QCompleter, \
-    QListWidget, QListWidgetItem, QDialog
+    QListWidget, QListWidgetItem, QDialog, QHBoxLayout, QSizePolicy
 import sqlite3
 
 
@@ -30,9 +30,17 @@ class MainWindow(QMainWindow):
         self.label = QLabel()
         self.input = QLineEdit()
         self.resultList = QListWidget()
+        self.filterBox = QComboBox()
 
         layout = QVBoxLayout()
-        layout.addWidget(self.input)
+        hLayout = QHBoxLayout()
+        policy = self.filterBox.sizePolicy()
+        policy.setHorizontalPolicy(QSizePolicy.Expanding)
+        self.filterBox.setSizePolicy(policy)
+
+        hLayout.addWidget(self.input)
+        hLayout.addWidget(self.filterBox)
+        layout.addLayout(hLayout)
         layout.addWidget(self.label)
         layout.addWidget(self.resultList)
 
@@ -54,6 +62,7 @@ class MainWindow(QMainWindow):
 
         completer.activated.connect(self.updateLabel)
         self.resultList.itemClicked.connect(self.resultItemClicked)
+        self.filterBox.activated.connect(self.filter)
 
     def openCardView(self, imgPath):
         img = ImageWindow(imgPath, self)
@@ -66,16 +75,46 @@ class MainWindow(QMainWindow):
                 'WHERE Price BETWEEN ? * .90 AND ? * 1.1 AND Card_Set NOT LIKE "%Promo%" ' \
                 'ORDER BY Card_Set, Price'
         res = self.cur.execute(query, (price, price)).fetchall()
+        self.filterBox.clear()
         self.resultList.clear()
-
+        self.filterBox.addItem("All")
+        seen = []
         for row in res:
             name, cardSet, price = row
             text = f"{name} - {cardSet} - ${price}"
             imgPath = os.path.join("Images", cardSet, f"{name}.jpg")
-
+            if cardSet not in seen:
+                seen.append(cardSet)
+                self.filterBox.addItem(cardSet)
             item = QListWidgetItem(text)
             item.imgPath = imgPath
             self.resultList.addItem(item)
+
+    def filter(self):
+        user_input = self.input.text()
+        price = user_input.split("$")[-1]
+        userFilter = self.filterBox.currentText()
+        if userFilter == 'All':
+            self.updateLabel()
+        else:
+
+            query = 'SELECT Name, Card_Set, Price FROM Cards ' \
+                    'WHERE Price BETWEEN ? * .90 AND ? * 1.1 AND Card_Set NOT LIKE "%Promo%" ' \
+                    'AND Card_SET = ?' \
+                    'ORDER BY Card_Set, Price'
+            res = self.cur.execute(query, (price, price, userFilter)).fetchall()
+            self.resultList.clear()
+            seen = []
+            for row in res:
+                name, cardSet, price = row
+                text = f"{name} - {cardSet} - ${price}"
+                imgPath = os.path.join("Images", cardSet, f"{name}.jpg")
+                if cardSet not in seen:
+                    seen.append(cardSet)
+                    self.filterBox.addItem(cardSet)
+                item = QListWidgetItem(text)
+                item.imgPath = imgPath
+                self.resultList.addItem(item)
 
     def resultItemClicked(self, item):
         self.openCardView(item.imgPath)
@@ -84,4 +123,6 @@ class MainWindow(QMainWindow):
 app = QApplication([])
 window = MainWindow()
 window.show()
+app.setWindowIcon(QIcon(os.path.join("Images", 'pball.ico')))
+window.setWindowIcon(QIcon(os.path.join("Images", 'pball.ico')))
 app.exec()
