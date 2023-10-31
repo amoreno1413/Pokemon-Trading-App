@@ -5,11 +5,11 @@
 This app is designed to help you determine the trade value of your Pokémon cards. Follow these simple steps:
 
 ## How to Use the App
-
-1. Enter the name of your Pokémon card in the search bar.
-2. Hit Enter or select from the suggested cards.
-3. You will receive a list of Pokémon cards whose values are within a range of 10% above or below your card's estimated value.
-4. Click on a card's name to view a photo of the card.
+1. Download the <a href="[url](https://drive.google.com/file/d/1qogvXPvQMyzV6E_M7PX89Q1yq2It-SDZ/view?usp=drive_link)">App</a>
+2. Enter the name of your Pokémon card in the search bar.
+3. Hit Enter or select from the suggested cards.
+4. You will receive a list of Pokémon cards whose values are within a range of 10% above or below your card's estimated value.
+5. Click on a card's name to view a photo of the card.
 
 ## About the App
 
