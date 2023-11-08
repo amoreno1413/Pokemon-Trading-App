@@ -2,7 +2,7 @@ import os
 
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QLineEdit, QVBoxLayout, QComboBox, QCompleter, \
-    QListWidget, QListWidgetItem, QDialog, QHBoxLayout, QSizePolicy
+    QListWidget, QListWidgetItem, QDialog, QHBoxLayout, QSizePolicy, QSplitter
 import sqlite3
 
 
@@ -23,38 +23,47 @@ class ImageWindow(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("Trading App")
-        self.setFixedSize(1000, 1000)
+        #self.setFixedSize(1000, 1000)
+        self.splitter = QSplitter()
+        leftLayout = QVBoxLayout()
+        rightLayout = QVBoxLayout()
+        photoLayout = QVBoxLayout()
 
         self.label = QLabel()
         self.input = QLineEdit()
         self.resultList = QListWidget()
         self.filterBox = QComboBox()
+        self.photo = QLabel()
 
-        layout = QVBoxLayout()
-        hLayout = QHBoxLayout()
         policy = self.filterBox.sizePolicy()
         policy.setHorizontalPolicy(QSizePolicy.Expanding)
         self.filterBox.setSizePolicy(policy)
 
-        hLayout.addWidget(self.input)
-        hLayout.addWidget(self.filterBox)
-        layout.addLayout(hLayout)
-        layout.addWidget(self.label)
-        layout.addWidget(self.resultList)
+        photoLayout.addWidget(self.photo)
+        leftLayout.addLayout(photoLayout)
+        leftLayout.addStretch(1)
+        rightLayout.addWidget(self.input)
+        rightLayout.addWidget(self.filterBox)
+        rightLayout.addWidget(self.label)
+        rightLayout.addWidget(self.resultList)
 
-        container = QWidget()
-        container.setLayout(layout)
+        leftWidget = QWidget()
+        leftWidget.setLayout(leftLayout)
+        rightWidget = QWidget()
+        rightWidget.setLayout(rightLayout)
 
-        self.setCentralWidget(container)
+        self.splitter.addWidget(leftWidget)
+        self.splitter.addWidget(rightWidget)
+
+        self.setCentralWidget(self.splitter)
 
         self.conn = sqlite3.connect('data.db')
         self.cur = self.conn.cursor()
         query = 'SELECT Name, Card_Set, Price FROM Cards'
         results = self.cur.execute(query).fetchall()
 
-        names = [f"{result[0]} - {result[1]} - ${result[2]}" for result in results]
+        names = [f"{result[0]} | {result[1]} | ${result[2]}" for result in results]
 
         completer = QCompleter(names)
         self.input.setCompleter(completer)
@@ -70,6 +79,15 @@ class MainWindow(QMainWindow):
 
     def updateLabel(self):
         user_input = self.input.text()
+        print(user_input)
+        name = user_input.split("|")[0].strip()
+        print(name)
+        cset = user_input.split("|")[1].lstrip().rstrip()
+        print(cset)
+        imgPath = os.path.join("Images", cset, f"{name}.jpg")
+        print(imgPath)
+        self.photo.setPixmap(QPixmap(imgPath))
+
         price = user_input.split("$")[-1]
         query = 'SELECT Name, Card_Set, Price FROM Cards ' \
                 'WHERE Price BETWEEN ? * .90 AND ? * 1.1 AND Card_Set NOT LIKE "%Promo%" ' \
@@ -123,7 +141,7 @@ class MainWindow(QMainWindow):
 
 app = QApplication([])
 window = MainWindow()
-window.show()
+window.showMaximized()
 app.setWindowIcon(QIcon(os.path.join("Images", 'pball.ico')))
 window.setWindowIcon(QIcon(os.path.join("Images", 'pball.ico')))
 app.exec()
