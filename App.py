@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Trading App")
-        #self.setFixedSize(1000, 1000)
+        # self.setFixedSize(1000, 1000)
         self.splitter = QSplitter()
         leftLayout = QVBoxLayout()
         rightLayout = QVBoxLayout()
@@ -35,6 +35,7 @@ class MainWindow(QMainWindow):
         self.resultList = QListWidget()
         self.filterBox = QComboBox()
         self.photo = QLabel()
+        self.photo.setPixmap(QPixmap('Images\Placeholder.jpg'))
 
         policy = self.filterBox.sizePolicy()
         policy.setHorizontalPolicy(QSizePolicy.Expanding)
@@ -79,13 +80,9 @@ class MainWindow(QMainWindow):
 
     def updateLabel(self):
         user_input = self.input.text()
-        print(user_input)
         name = user_input.split("|")[0].strip()
-        print(name)
         cset = user_input.split("|")[1].lstrip().rstrip()
-        print(cset)
         imgPath = os.path.join("Images", cset, f"{name}.jpg")
-        print(imgPath)
         self.photo.setPixmap(QPixmap(imgPath))
 
         price = user_input.split("$")[-1]
@@ -136,6 +133,7 @@ class MainWindow(QMainWindow):
                 self.resultList.addItem(item)
 
     def resultItemClicked(self, item):
+        print(item.imgPath)
         self.openCardView(item.imgPath)
 
 
