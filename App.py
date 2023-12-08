@@ -7,12 +7,19 @@ import sqlite3
 
 
 class ImageWindow(QDialog):
+    PLACEHOLDER_IMAGE_PATH = os.path.join('Images', 'Placeholder.jpg')
+
     def __init__(self, imgPath, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Card Viewer")
         self.setGeometry(100, 100, 400, 400)
         self.label = QLabel()
-        self.label.setPixmap(QPixmap(imgPath))
+
+        # Set pixmap to a placeholder img if the specified img path does not exist
+        if not os.path.isfile(imgPath):
+            self.label.setPixmap(QPixmap(self.PLACEHOLDER_IMAGE_PATH))
+        else:
+            self.label.setPixmap(QPixmap(imgPath))
 
         layout = QVBoxLayout()
         layout.addWidget(self.label)
@@ -21,10 +28,11 @@ class ImageWindow(QDialog):
 
 
 class MainWindow(QMainWindow):
+    PLACEHOLDER_IMAGE_PATH = os.path.join('Images', 'Placeholder.jpg')
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Trading App")
-        # self.setFixedSize(1000, 1000)
         self.splitter = QSplitter()
         leftLayout = QVBoxLayout()
         rightLayout = QVBoxLayout()
@@ -64,6 +72,7 @@ class MainWindow(QMainWindow):
         query = 'SELECT Name, Card_Set, Price FROM Cards'
         results = self.cur.execute(query).fetchall()
 
+        # Prepare names for the autocompleter
         names = [f"{result[0]} | {result[1]} | ${result[2]}" for result in results]
 
         completer = QCompleter(names)
@@ -74,19 +83,23 @@ class MainWindow(QMainWindow):
         self.resultList.itemClicked.connect(self.resultItemClicked)
         self.filterBox.activated.connect(self.filter)
 
+    # Function to open card img in new window
     def openCardView(self, imgPath):
         img = ImageWindow(imgPath, self)
         img.exec()
 
     def updateLabel(self):
         user_input = self.input.text()
-        name = user_input.split("|")[0].strip()
-        cset = user_input.split("|")[1].lstrip().rstrip()
+        name, cset, price = map(str.strip, user_input.split("|"))
         imgPath = os.path.join("Images", cset, f"{name}.jpg")
-        self.photo.setPixmap(QPixmap(imgPath))
+
+        if not os.path.isfile(imgPath):
+            self.photo.setPixmap(QPixmap('Images\Placeholder.jpg'))
+        else:
+            self.photo.setPixmap(QPixmap(imgPath))
 
         price = user_input.split("$")[-1]
-        query = 'SELECT Name, Card_Set, Price FROM Cards ' \
+        query = 'SELECT Name, Card_Set, Price, Type FROM Cards ' \
                 'WHERE Price BETWEEN ? * .90 AND ? * 1.1 AND Card_Set NOT LIKE "%Promo%" ' \
                 'ORDER BY Card_Set, Price'
         res = self.cur.execute(query, (price, price)).fetchall()
@@ -96,12 +109,17 @@ class MainWindow(QMainWindow):
         seen = []
 
         for row in res:
-            name, cardSet, price = row
+            name, cardSet, price, ctype = row
             text = f"{name} - {cardSet} - ${price}"
             imgPath = os.path.join("Images", cardSet, f"{name}.jpg")
+
             if cardSet not in seen:
                 seen.append(cardSet)
                 self.filterBox.addItem(cardSet)
+            if ctype not in seen:
+                seen.append(ctype)
+                self.filterBox.addItem(ctype)
+
             item = QListWidgetItem(text)
             item.imgPath = imgPath
             self.resultList.addItem(item)
@@ -110,11 +128,11 @@ class MainWindow(QMainWindow):
         user_input = self.input.text()
         price = user_input.split("$")[-1]
         userFilter = self.filterBox.currentText()
+
         if userFilter == 'All':
             self.updateLabel()
         else:
-
-            query = 'SELECT Name, Card_Set, Price FROM Cards ' \
+            query = 'SELECT Name, Card_Set, Price, Type FROM Cards ' \
                     'WHERE Price BETWEEN ? * .90 AND ? * 1.1 AND Card_Set NOT LIKE "%Promo%" ' \
                     'AND Card_SET = ?' \
                     'ORDER BY Card_Set, Price'
@@ -122,18 +140,20 @@ class MainWindow(QMainWindow):
             self.resultList.clear()
             seen = []
             for row in res:
-                name, cardSet, price = row
+                name, cardSet, price, ctype = row
                 text = f"{name} - {cardSet} - ${price}"
                 imgPath = os.path.join("Images", cardSet, f"{name}.jpg")
                 if cardSet not in seen and cardSet != self.filterBox.currentText():
                     seen.append(cardSet)
                     self.filterBox.addItem(cardSet)
+                if ctype not in seen and ctype != self.filterBox.currentText():
+                    seen.append(ctype)
+                    self.filterBox.addItem(ctype)
                 item = QListWidgetItem(text)
                 item.imgPath = imgPath
                 self.resultList.addItem(item)
 
     def resultItemClicked(self, item):
-        print(item.imgPath)
         self.openCardView(item.imgPath)
 
 
