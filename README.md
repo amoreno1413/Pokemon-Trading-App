@@ -2,7 +2,8 @@
 
 # Trading App - Pokémon Card Value Checker
 
-This app is designed to help you determine the trade value of your Pokémon cards. Follow these simple steps:
+This app is designed to help you determine the trade value of your Pokémon cards. Prices will be updated on the first of every month, and 2 weeks after a new set releases.
+Follow these simple steps:
 
 ## How to Use the App
 1. Download and extract the [App](https://drive.google.com/file/d/1R6AVEEgVyCDInMn9bTUfjgEDjZKK0Y6h/view?usp=sharing)
@@ -16,6 +17,8 @@ This app is designed to help you determine the trade value of your Pokémon card
 This app helps you make informed decisions about the value of your Pokémon cards when trading. It's a handy tool for collectors and traders alike. 
 
 At the moment the card database contains cards from D/P-S/V (Excluding Promos), older cards will be added in the future!
+
+Prices updated as of 12/19
 
 Happy trading!
 
