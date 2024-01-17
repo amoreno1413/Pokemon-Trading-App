@@ -102,6 +102,7 @@ class MainWindow(QMainWindow):
         query = 'SELECT Name, Card_Set, Price, Type FROM Cards ' \
                 'WHERE Price BETWEEN ? * .90 AND ? * 1.1 AND Card_Set NOT LIKE "%Promo%" ' \
                 'ORDER BY Card_Set, Price'
+
         res = self.cur.execute(query, (price, price)).fetchall()
         self.filterBox.clear()
         self.resultList.clear()
@@ -109,20 +110,23 @@ class MainWindow(QMainWindow):
         seen = []
 
         for row in res:
-            name, cardSet, price, ctype = row
-            text = f"{name} - {cardSet} - ${price}"
-            imgPath = os.path.join("Images", cardSet, f"{name}.jpg")
+            cname, cardSet, price, ctype = row
+            text = f"{cname} - {cardSet} - ${price}"
+            imgPath = os.path.join("Images", cardSet, f"{cname}.jpg")
 
             if cardSet not in seen:
                 seen.append(cardSet)
                 self.filterBox.addItem(cardSet)
+
             if ctype not in seen:
                 seen.append(ctype)
                 self.filterBox.addItem(ctype)
 
             item = QListWidgetItem(text)
             item.imgPath = imgPath
-            self.resultList.addItem(item)
+
+            if cname != name:
+                self.resultList.addItem(item)
 
     def filter(self):
         user_input = self.input.text()
@@ -134,11 +138,13 @@ class MainWindow(QMainWindow):
         else:
             query = 'SELECT Name, Card_Set, Price, Type FROM Cards ' \
                     'WHERE Price BETWEEN ? * .90 AND ? * 1.1 AND Card_Set NOT LIKE "%Promo%" ' \
-                    'AND Card_SET = ?' \
+                    'AND (Card_SET = ? OR Type = ?)' \
                     'ORDER BY Card_Set, Price'
-            res = self.cur.execute(query, (price, price, userFilter)).fetchall()
+
+            res = self.cur.execute(query, (price, price, userFilter, userFilter)).fetchall()
             self.resultList.clear()
             seen = []
+
             for row in res:
                 name, cardSet, price, ctype = row
                 text = f"{name} - {cardSet} - ${price}"
