@@ -2,7 +2,7 @@ import os
 
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QLineEdit, QVBoxLayout, QComboBox, QCompleter, \
-    QListWidget, QListWidgetItem, QDialog, QHBoxLayout, QSizePolicy, QSplitter
+    QListWidget, QListWidgetItem, QDialog, QSizePolicy, QSplitter
 import sqlite3
 
 
