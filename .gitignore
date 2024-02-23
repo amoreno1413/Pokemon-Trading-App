@@ -1,0 +1,10 @@
+App.sec
+.idea
+build
+dist
+venv
+DataTest.db
+DataTesting.db
+ImgDownload.py
+ImgRename.py
+PriceScript.py
